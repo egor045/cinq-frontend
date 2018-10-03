@@ -831,6 +831,37 @@ function config($stateProvider, $urlServiceProvider) {
     ;
     //endregion
 
+    // region S3 Buckets
+    $stateProvider
+        .state('s3', {
+            abstract: true,
+            parent: 'main',
+            template: '<ui-view/>'
+        })
+        .state('s3.list', {
+            url: '/s3/list?{page:int}&{count:int}&{accounts:string}&{location:string}&{resourceId:string}&' +
+            '{websiteEnabled:string}',
+            params: {
+                page: 1,
+                count: 100,
+                accounts: [],
+                location: [],
+                resourceId: undefined,
+                websiteEnabled: undefined,
+            },
+            component: 's3List',
+            resolve: {
+                params: $transition$ => {
+                    return stateParams($transition$);
+                },
+                result: (S3Bucket, Utils, $transition$) => {
+                    return S3Bucket.query(stateParams($transition$));
+                }
+            }
+        })
+    ;
+    //endregion
+
     //region AuditLog
     $stateProvider
         .state('auditlog', {
@@ -865,6 +896,47 @@ function config($stateProvider, $urlServiceProvider) {
                 },
                 result: (AuditLog, $transition$) => {
                     return AuditLog.get(stateParams($transition$));
+                }
+            }
+        })
+    ;
+    //endregion
+
+    //region ELBs
+    $stateProvider
+        .state('elb', {
+            abstract: true,
+            parent: 'main',
+            template: '<ui-view/>'
+        })
+        .state('elb.list', {
+            url: '/elb/list?{page:int}&{count:int}&{accounts:string}&{regions:string}&{numInstances:int}',
+            params: {
+                page: 1,
+                count: 100,
+                accounts: [],
+                regions: [],
+                numInstances: undefined
+            },
+            component: 'elbList',
+            resolve: {
+                params: $transition$ => {
+                    return stateParams($transition$);
+                },
+                result: (ELB, Utils, $transition$) => {
+                    return ELB.query(stateParams($transition$));
+                }
+            }
+        })
+        .state('elb.details', {
+            url: '/elb/details/{resourceId:string}',
+            component: 'elbDetails',
+            resolve: {
+                params: ($transition$) => {
+                    return stateParams($transition$);
+                },
+                result: (ELB, $transition$) => {
+                    return ELB.get(stateParams($transition$));
                 }
             }
         })
